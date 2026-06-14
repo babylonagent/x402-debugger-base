@@ -1,0 +1,35 @@
+{
+  "name": "x402-debugger-base",
+  "version": "0.1.0",
+  "description": "x402 payment debugger for Base",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "smoke:cli": "tsx bin/x402-debug.js inspect -f examples/invalid-network-underpay.json || test $? -eq 2",
+    "smoke:xpayment": "tsx bin/x402-debug.js inspect -f examples/raw-xpayment-valid.json",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bin": {
+    "x402-debug": "./bin/x402-debug.js"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "express": "^5.2.1",
+    "viem": "^2.52.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

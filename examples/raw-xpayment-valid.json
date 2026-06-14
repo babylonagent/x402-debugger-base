@@ -1,0 +1,11 @@
+{
+  "requirement": {
+    "scheme": "exact",
+    "network": "base",
+    "maxAmountRequired": "10000",
+    "resource": "https://api.example.com/weather",
+    "payTo": "0x1111111111111111111111111111111111111111",
+    "asset": "0x2222222222222222222222222222222222222222"
+  },
+  "xPayment": "eyJuZXR3b3JrIjoiYmFzZSIsInBheWxvYWQiOnsiYXV0aG9yaXphdGlvbiI6eyJmcm9tIjoiMHgzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzIiwidG8iOiIweDExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTEiLCJ2YWx1ZSI6IjEwMDAwIn19fQ"
+}

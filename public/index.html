@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>x402 Debugger Base</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #090909; color: #f4f4f0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top left, #1f2a1f, transparent 30rem), #090909; }
+    main { width: min(1180px, calc(100vw - 32px)); margin: 0 auto; padding: 48px 0; }
+    header { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 28px; }
+    h1 { font-size: clamp(34px, 6vw, 76px); letter-spacing: -0.07em; line-height: .9; margin: 0; }
+    .tag { color: #a5a59c; max-width: 440px; line-height: 1.45; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    section { border: 1px solid #2e2e29; background: rgba(16,16,14,.84); border-radius: 22px; padding: 18px; box-shadow: 0 24px 80px rgba(0,0,0,.28); }
+    label { display: block; color: #c9c9bf; font-size: 13px; margin: 12px 0 7px; }
+    textarea, input, select { width: 100%; border: 1px solid #33332e; background: #0d0d0c; color: #f4f4f0; border-radius: 14px; padding: 12px; font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    textarea { min-height: 260px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 180px; gap: 10px; }
+    button { border: 0; background: #d7ff66; color: #10100c; padding: 12px 16px; border-radius: 999px; font-weight: 800; cursor: pointer; margin-top: 14px; }
+    button.secondary { background: #24241f; color: #f4f4f0; border: 1px solid #3b3b34; }
+    pre { margin: 0; min-height: 420px; white-space: pre-wrap; word-break: break-word; font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: #d9f99d; }
+    .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: #24241f; color: #d7ff66; font-size: 12px; margin-bottom: 12px; }
+    @media (max-width: 850px) { header, .grid, .row { grid-template-columns: 1fr; display: grid; } main { padding-top: 28px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="status">Base x402 diagnostics</div>
+        <h1>Paste.<br/>Inspect.<br/>Fix.</h1>
+      </div>
+      <p class="tag">Debug x402 payment payloads, raw X-PAYMENT headers, and Base transaction hashes. Built for tool providers and agents that need receipts, not riddles.</p>
+    </header>
+
+    <div class="grid">
+      <section>
+        <label>Mode</label>
+        <select id="mode">
+          <option value="payment">Requirement + payment / X-PAYMENT</option>
+          <option value="tx">Transaction hash lookup</option>
+        </select>
+
+        <div id="paymentFields">
+          <label>Inspection JSON</label>
+          <textarea id="jsonInput"></textarea>
+          <label>Optional raw X-PAYMENT header</label>
+          <input id="xPayment" placeholder="base64url X-PAYMENT header" />
+        </div>
+
+        <div id="txFields" style="display:none">
+          <label>Transaction hash</label>
+          <input id="txHash" placeholder="0x..." />
+          <div class="row">
+            <div>
+              <label>Network</label>
+              <select id="network"><option value="base">base</option><option value="base-sepolia">base-sepolia</option></select>
+            </div>
+            <div>
+              <label>Custom RPC</label>
+              <input id="rpcUrl" placeholder="optional" />
+            </div>
+          </div>
+        </div>
+
+        <button id="inspect">Inspect</button>
+        <button class="secondary" id="sample">Load sample</button>
+      </section>
+
+      <section>
+        <label>Result</label>
+        <pre id="output">Awaiting omen...</pre>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sample = {
+      requirement: {
+        network: 'base', maxAmountRequired: '10000', resource: 'https://api.example.com/weather',
+        payTo: '0x1111111111111111111111111111111111111111', asset: '0x2222222222222222222222222222222222222222'
+      },
+      payment: { network: 'base-sepolia', payload: { authorization: { from: '0x3333333333333333333333333333333333333333', to: '0x1111111111111111111111111111111111111111', value: '9999' } } }
+    };
+    const $ = (id) => document.getElementById(id);
+    $('jsonInput').value = JSON.stringify(sample, null, 2);
+    $('mode').onchange = () => {
+      const tx = $('mode').value === 'tx';
+      $('paymentFields').style.display = tx ? 'none' : 'block';
+      $('txFields').style.display = tx ? 'block' : 'none';
+    };
+    $('sample').onclick = () => { $('jsonInput').value = JSON.stringify(sample, null, 2); $('output').textContent = 'Sample loaded.'; };
+    $('inspect').onclick = async () => {
+      try {
+        const body = $('mode').value === 'tx'
+          ? { txHash: $('txHash').value, network: $('network').value, rpcUrl: $('rpcUrl').value || undefined }
+          : { ...JSON.parse($('jsonInput').value), xPayment: $('xPayment').value || undefined };
+        const res = await fetch('/inspect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        const json = await res.json();
+        $('output').textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        $('output').textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>
